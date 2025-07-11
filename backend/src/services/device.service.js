@@ -1,0 +1,30 @@
+import deviceModel from "../db/models/device.model.js"
+
+export default class DeviceService{
+    constructor(){}
+
+    getAll=async()=>{
+        return await deviceModel.find()
+    }
+
+    getByIp=async(ip)=>{
+        return await deviceModel.findOne({ip})
+    }
+
+    getById=async(id)=>{
+        return await deviceModel.findById(id)
+    }
+
+    create=async(datos)=>{
+        return await deviceModel.create(datos)
+    }
+
+    update=async(id,datos)=>{
+        return await deviceModel.findByIdAndUpdate(id, datos, {new:true})
+    }
+
+    delete=async(id)=>{
+        return await deviceModel.findByIdAndDelete(id)
+    }
+
+}
