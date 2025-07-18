@@ -2,6 +2,7 @@ import ping from "ping";
 import deviceHistoryModel from "../db/models/deviceHistory.model.js";
 import deviceStatsModel from "../db/models/deviceStats.model.js";
 import DeviceService from "../services/device.service.js";
+import { io } from "../app.js";
 const deviceService = new DeviceService();
 
 const timePing = 5 * 1000; //5seg
@@ -25,6 +26,7 @@ const checkDevice = async (host) => {
   }
 
   const res = await ping.promise.probe(host.ip, { timeout: 10 });
+  console.log(`Ping ${host.ip}, ${res.alive}`);
   const newIsAlive = res.alive;
 
   if (newIsAlive !== host.isAlive) {
@@ -38,7 +40,7 @@ const checkDevice = async (host) => {
     await deviceService.update(host.id, { isAlive: newIsAlive });
   }
 
-  if (devicesStats.recentPings.length >= 100) {
+  if (devicesStats.recentPings.length >= 50) {
     devicesStats.recentPings.shift();
   }
 
@@ -48,6 +50,29 @@ const checkDevice = async (host) => {
   });
 
   await devicesStats.save();
+
+  // Calcular porcentaje de pings UP
+  let total = devicesStats.recentPings.length;
+  let pingUp = devicesStats.recentPings.filter((p) => p.status === "UP").length;
+  let pingDown = total - pingUp;
+  let promedio = total > 0 ? ((pingUp / total) * 100).toFixed(2) : 0;
+
+  io.emit("stats:update", {
+    deviceId: host._id,
+    promedio: promedio,
+  });
+
+  io.emit("device:update", {
+    deviceId: host._id,
+    isAlive: newIsAlive,
+  });
+
+  let lastsPings= devicesStats.recentPings.slice(-20)
+
+  io.emit("pings:update", {
+    deviceId: host._id,
+    lastsPings: lastsPings,
+  });
 };
 
 export default pings;
