@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Dispositivo from "./Dispositivo";
 import { getDevices } from "../../APIS/deviceAPI.js";
 
-const ListaDispositivos = () => {
+const ListaDispositivos = ({ onSelectDevice }) => {
   const [listaDevices, setListaDevices] = useState([]);
   useEffect(() => {
     obtenerDevices();
@@ -64,9 +64,15 @@ const ListaDispositivos = () => {
           />
         </div>
       </div>
-      <div className="flex justify-between items-center bg-gray-800 w-full px-2 py-4">
+      <div className=" bg-gray-800 w-full px-2 py-4">
         {listaDevices.map((device) => (
-          <Dispositivo device={device} key={device._id}></Dispositivo>
+          <div
+            onClick={() => onSelectDevice(device)}
+            key={device._id}
+            className="flex px-2 py-4 justify-between items-center cursor-pointer hover:bg-gray-600 w-full"
+          >
+            <Dispositivo device={device} />
+          </div>
         ))}
       </div>
     </section>

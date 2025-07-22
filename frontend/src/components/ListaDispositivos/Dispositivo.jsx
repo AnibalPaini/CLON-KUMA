@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { getDeviceStats } from "../../APIS/deviceStatsAPI.js";
-import { io } from "socket.io-client";
-
-const socket = io("http://localhost:8080");
+import {useSocket} from "../../hooks/useSocket.js"
 
 const Dispositivo = ({ device }) => {
   const [stats, setStats] = useState();
   const [isAlive, setIsAlive] = useState(device.isAlive);
   const [lastsPings, setLastsPings]=useState([])
+  const socket = useSocket();
 
   useEffect(() => {
     obtenerStats();
+    if(!socket)return
 
     // Suscripción a eventos
     socket.on("stats:update", (data) => {
@@ -35,7 +35,7 @@ const Dispositivo = ({ device }) => {
       socket.off("stats:update");
       socket.off("device:update");
     };
-  }, [device._id]);
+  }, [device._id,socket]);
 
   const obtenerStats = async () => {
     try {

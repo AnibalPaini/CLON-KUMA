@@ -10,6 +10,7 @@ const timePing = 5 * 1000; //5seg
 const pings = () => {
   setInterval(async () => {
     const hosts = await deviceService.getAll();
+    eventStatusDevices(hosts);
     for (let host of hosts) {
       checkDevice(host);
     }
@@ -67,11 +68,26 @@ const checkDevice = async (host) => {
     isAlive: newIsAlive,
   });
 
-  let lastsPings= devicesStats.recentPings.slice(-20)
+  let lastsPings = devicesStats.recentPings.slice(-20);
 
   io.emit("pings:update", {
     deviceId: host._id,
     lastsPings: lastsPings,
+  });
+};
+
+const eventStatusDevices = (hosts) => {
+  let devicesConnected = hosts.filter(
+    (host) => host.isConnected === true
+  ).length;
+  console.log(devicesConnected);
+  
+
+  let devicesDisconnected = hosts.length - devicesConnected;
+
+  io.emit("pings:connected", {
+    connected: devicesConnected,
+    disconnected: devicesDisconnected,
   });
 };
 
