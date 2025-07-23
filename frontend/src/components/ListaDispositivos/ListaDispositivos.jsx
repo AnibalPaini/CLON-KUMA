@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Dispositivo from "./Dispositivo";
 import { getDevices } from "../../APIS/deviceAPI.js";
 
-const ListaDispositivos = ({ onSelectDevice }) => {
+const ListaDispositivos = ({ onSelectDevice, newDevice }) => {
   const [listaDevices, setListaDevices] = useState([]);
   useEffect(() => {
     obtenerDevices();
@@ -21,7 +21,7 @@ const ListaDispositivos = ({ onSelectDevice }) => {
     <section className="p-5">
       <div className="flex w-full justify-between bg-gray-600 px-2 py-4 rounded-t-xl">
         <div className="flex items-center">
-          <button className="px-4 py-1 bg-green-400 rounded-2xl text-gray-900 font-semibold flex items-center">
+          <button onClick={()=>{newDevice(true); onSelectDevice(null)}} className="px-4 py-1 bg-green-400 rounded-2xl text-gray-900 font-semibold flex items-center cursor-pointer transition-colors hover:bg-green-500" >
             <span className="">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +67,7 @@ const ListaDispositivos = ({ onSelectDevice }) => {
       <div className=" bg-gray-800 w-full px-2 py-4">
         {listaDevices.map((device) => (
           <div
-            onClick={() => onSelectDevice(device)}
+            onClick={() => {onSelectDevice(device); newDevice(false)}}
             key={device._id}
             className="flex px-2 py-4 justify-between items-center cursor-pointer hover:bg-gray-600 w-full"
           >
