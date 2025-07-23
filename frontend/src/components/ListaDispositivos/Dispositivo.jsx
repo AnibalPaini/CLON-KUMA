@@ -56,8 +56,8 @@ const Dispositivo = ({ device }) => {
         <p className="text-lg text-gray-200">{device.ip}</p>
       </div>
       <div className="flex space-x-1">
-        {lastsPings.map((ping)=>(
-          <span className={`h-4 w-2 rounded-2xl transform hover:scale-110 ${ping.status === "UP"? "bg-green-500" : "bg-red-500" }`}></span>
+        {lastsPings.map((ping, index)=>(
+          <span className={`h-4 w-2 rounded-2xl transform hover:scale-110 ${ping.status === "UP"? "bg-green-500" : "bg-red-500" }`} key={index}></span>
         ))}
       </div>
     </>

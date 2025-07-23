@@ -26,7 +26,7 @@ const checkDevice = async (host) => {
     });
   }
 
-  const res = await ping.promise.probe(host.ip, { timeout: 10 });
+  const res = await ping.promise.probe(host.ip, { timeout: 5 });
   console.log(`Ping ${host.ip}, ${res.alive}`);
   const newIsAlive = res.alive;
 
@@ -77,13 +77,11 @@ const checkDevice = async (host) => {
 };
 
 const eventStatusDevices = (hosts) => {
-  let devicesConnected = hosts.filter(
-    (host) => host.isConnected === true
-  ).length;
+  let devicesConnected = hosts.filter((host) => host.isConnected).length;
   console.log(devicesConnected);
-  
 
   let devicesDisconnected = hosts.length - devicesConnected;
+  console.log(devicesDisconnected);
 
   io.emit("pings:connected", {
     connected: devicesConnected,
