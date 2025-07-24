@@ -5,24 +5,24 @@ import { useSocket } from "../../hooks/useSocket.js";
 const AllDevices = () => {
   const [connected, setConnected] = useState(0);
   const [disconnected, setDisconnected] = useState(0);
-  const socket=useSocket()
+  const [paused, setPaused] = useState(0);
+  const socket = useSocket();
 
   useEffect(() => {
     obtenerDevices();
 
     if (!socket) {
-        return
+      return;
     }
 
-    socket.on("pings:connected", (data)=>{
-        setConnected(data.connected)
-        setDisconnected(data.disconnected)
+    socket.on("pings:connected", (data) => {
+      setConnected(data.connected);
+      setDisconnected(data.disconnected);
     });
 
     return () => {
       socket.off("pings:connected");
     };
-
   }, [socket]);
 
   const obtenerDevices = async () => {
@@ -30,11 +30,17 @@ const AllDevices = () => {
       const res = await getDevices();
       let devices = res.data.payload;
       let devicesConnected = devices.filter(
-        (device) => device.isConnected === true
+        (device) => device.isConnected === true && device.paused === false
       ).length;
-      let devicesDisconnected = devices.length - devicesConnected;
+      let devicesPaused = devices.filter(
+        (device) => device.paused === true
+      ).length;
+      let devicesDisconnected = devices.filter(
+        (device) => device.isConnected === false
+      ).length;
       setConnected(devicesConnected);
       setDisconnected(devicesDisconnected);
+      setPaused(devicesPaused);
     } catch (error) {
       console.log(error);
     }
@@ -49,6 +55,10 @@ const AllDevices = () => {
         <div className="flex-1 bg-green-600 p-4 rounded-xl shadow-md flex flex-col items-center">
           <span className="text-3xl font-bold">{connected}</span>
           <p className="text-md mt-1">Conectados</p>
+        </div>
+        <div className="flex-1 bg-gray-600 p-4 rounded-xl shadow-md flex flex-col items-center">
+          <span className="text-3xl font-bold">{paused}</span>
+          <p className="text-md mt-1">Pausados</p>
         </div>
         <div className="flex-1 bg-red-600 p-4 rounded-xl shadow-md flex flex-col items-center">
           <span className="text-3xl font-bold">{disconnected}</span>

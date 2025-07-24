@@ -27,4 +27,8 @@ export default class DeviceService{
         return await deviceModel.findByIdAndDelete(id)
     }
 
+    pause=async(id, datos)=>{
+        return await deviceModel.findByIdAndUpdate(id, datos, {new:true})
+    }
+
 }

@@ -1,6 +1,66 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { getDeviceStats } from "../../APIS/deviceStatsAPI";
+import { pauseDevice } from "../../APIS/deviceAPI.js";
+import { useSocket } from "../../hooks/useSocket.js";
 
-const DeviceInfo = ({ device }) => {
+const DeviceInfo = ({ device, setActualizar }) => {
+  const [stats, setStats] = useState();
+  const [ms, setMs] = useState(0);
+  const [isAlive, setIsAlive] = useState(device.isAlive);
+  const [lastsPings, setLastsPings] = useState([]);
+  const socket = useSocket();
+  useEffect(() => {
+    obtenerStats();
+    if (!socket) return;
+
+    // Suscripción a eventos
+    socket.on("stats:update", (data) => {
+      if (data.deviceId === device._id) {
+        setStats((prev) => ({ ...prev, promedio: data.promedio }));
+        setMs(data.ms);
+      }
+    });
+
+    socket.on("device:update", (data) => {
+      if (data.deviceId === device._id) {
+        setIsAlive(data.isAlive);
+      }
+    });
+
+    socket.on("pings:update", (data) => {
+      if (data.deviceId === device._id) {
+        setLastsPings(data.lastsPings);
+      }
+    });
+
+    return () => {
+      socket.off("stats:update");
+      socket.off("device:update");
+      socket.off("pings:update");
+    };
+  }, [device._id, socket]);
+
+  const obtenerStats = async () => {
+    try {
+      const res = await getDeviceStats(device._id);
+      console.log(res.data.payload);
+
+      setStats(res.data.payload);
+      setMs(res.data.payload.ms);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handlerPauseDevice = async () => {
+    try {
+      await pauseDevice(device._id);
+      setActualizar(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div>
       <h2 className="text-gray-400 font-semibold text-3xl mb-2">
@@ -9,7 +69,10 @@ const DeviceInfo = ({ device }) => {
       <p className="text-green-500 font-bold text-md ml-1">{device.ip}</p>
 
       <div className="flex w-fit text-gray-300 mt-3">
-        <button className="flex items-center gap-x-1 cursor-pointer py-2 px-4 bg-gray-800 hover:bg-gray-900 rounded-l-2xl">
+        <button
+          className="flex items-center gap-x-1 cursor-pointer py-2 px-4 bg-gray-800 hover:bg-gray-900 rounded-l-2xl"
+          onClick={() => handlerPauseDevice()}
+        >
           <svg
             width="16px"
             height="16px"
@@ -101,6 +164,9 @@ const DeviceInfo = ({ device }) => {
           </svg>
           Eliminar
         </button>
+      </div>
+      <div>
+        <p>{ms}</p>
       </div>
     </div>
   );

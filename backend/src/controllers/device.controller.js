@@ -51,3 +51,22 @@ export const delDevicesController = async (req, res) => {
     res.status(500).send("Error al crear los devices!");
   }
 };
+
+export const pauseDeviceController = async (req, res) => {
+  try {
+    const { did } = req.params;
+    const device= await deviceService.getById(did)
+    if(!device) return res.status(404).send({error:"No encontrado!"})
+    let datos={
+      paused: !device.paused,
+    }
+    const deviceUpdated = await deviceService.pause(did, datos);
+
+    if (!deviceUpdated)
+      return res.status(404).send({ error: "Dispositivo no existente!" });
+    res.status(200).send({ status: "Success", payload: deviceUpdated });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Error al crear los devices!");
+  }
+};

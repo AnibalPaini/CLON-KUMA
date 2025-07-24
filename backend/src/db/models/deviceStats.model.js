@@ -5,6 +5,7 @@ const deviceStatsSchema = mongoose.Schema({
   recentPings: [
     {
       status: { type: String, enum: ["UP", "DOWN"] },
+      ms:{type: String, default:0},
       timestamp: { type: Date, default: Date.now },
     }
   ],

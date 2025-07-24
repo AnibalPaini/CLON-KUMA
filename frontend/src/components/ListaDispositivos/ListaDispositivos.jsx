@@ -2,11 +2,16 @@ import React, { useEffect, useState } from "react";
 import Dispositivo from "./Dispositivo";
 import { getDevices } from "../../APIS/deviceAPI.js";
 
-const ListaDispositivos = ({ onSelectDevice, newDevice }) => {
+const ListaDispositivos = ({
+  onSelectDevice,
+  newDevice,
+  actualizar,
+  setActualizar,
+}) => {
   const [listaDevices, setListaDevices] = useState([]);
   useEffect(() => {
     obtenerDevices();
-  }, []);
+  }, [actualizar]);
 
   const obtenerDevices = async () => {
     try {
@@ -21,7 +26,13 @@ const ListaDispositivos = ({ onSelectDevice, newDevice }) => {
     <section className="p-5">
       <div className="flex w-full justify-between bg-gray-600 px-2 py-4 rounded-t-xl">
         <div className="flex items-center">
-          <button onClick={()=>{newDevice(true); onSelectDevice(null)}} className="px-4 py-1 bg-green-400 rounded-2xl text-gray-900 font-semibold flex items-center cursor-pointer transition-colors hover:bg-green-500" >
+          <button
+            onClick={() => {
+              newDevice(true);
+              onSelectDevice(null);
+            }}
+            className="px-4 py-1 bg-green-400 rounded-2xl text-gray-900 font-semibold flex items-center cursor-pointer transition-colors hover:bg-green-500"
+          >
             <span className="">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -65,15 +76,20 @@ const ListaDispositivos = ({ onSelectDevice, newDevice }) => {
         </div>
       </div>
       <div className=" bg-gray-800 w-full px-2 py-4">
-        {listaDevices.map((device) => (
+        {
+        listaDevices.length!==0? 
+        listaDevices.map((device) => (
           <div
-            onClick={() => {onSelectDevice(device); newDevice(false)}}
+            onClick={() => {
+              onSelectDevice(device);
+              newDevice(false);
+            }}
             key={device._id}
             className="flex px-2 py-4 justify-between items-center cursor-pointer hover:bg-gray-600 w-full"
           >
-            <Dispositivo device={device} />
+            <Dispositivo device={device} actualizar={actualizar} setActualizar={setActualizar}/>
           </div>
-        ))}
+        )): <p className="text-gray-100">No hay dispositivos agregados aún.</p>}
       </div>
     </section>
   );

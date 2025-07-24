@@ -10,6 +10,6 @@ export default class DeviceStatsService{
         return await deviceStatsModel.findById(id)
     }
     getByDeviceId=async(deviceId)=>{
-        return await deviceStatsModel.findOne({deviceId:deviceId})
+        return await deviceStatsModel.findOne({deviceId:deviceId}).populate("deviceId", "paused")
     }
 }
