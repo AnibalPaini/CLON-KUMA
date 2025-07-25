@@ -13,20 +13,24 @@ const Dispositivo = ({ device, setActualizar, actualizar }) => {
 
     if (!socket) return;
 
+    console.log(`Conectado eventos para dispositivo ${device.name}`);
     const handleStats = (data) => {
       if (data.deviceId === device._id) {
+        console.log("📊 Recibido stats", data);
         setStats((prev) => ({ ...prev, promedio: data.promedio }));
       }
     };
 
     const handleDevice = (data) => {
       if (data.deviceId === device._id) {
+        console.log("⚡ Estado actualizado", data);
         setIsAlive(data.isAlive);
       }
     };
 
     const handlePings = (data) => {
       if (data.deviceId === device._id) {
+        console.log("📶 Nuevos pings", data);
         setLastsPings(data.lastsPings);
       }
     };
@@ -34,13 +38,13 @@ const Dispositivo = ({ device, setActualizar, actualizar }) => {
     socket.on("stats:update", handleStats);
     socket.on("device:update", handleDevice);
     socket.on("pings:update", handlePings);
-
     return () => {
+      console.log(`Desconectando eventos para dispositivo ${device.name}`);
       socket.off("stats:update", handleStats);
       socket.off("device:update", handleDevice);
       socket.off("pings:update", handlePings);
     };
-  }, [device, socket, actualizar]);
+  }, [socket,device, actualizar]);
 
   const obtenerStats = async () => {
     try {
@@ -57,7 +61,7 @@ const Dispositivo = ({ device, setActualizar, actualizar }) => {
     <>
       <div className="flex gap-x-2 items-center">
         <span
-          className={`rounded-xl p-1 ${
+          className={`rounded-xl w-15 text-center ${
             stats?.paused
               ? "bg-gray-400 text-black"
               : isAlive

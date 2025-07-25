@@ -32,9 +32,12 @@ const checkDevice = async (host) => {
   if (newIsAlive !== host.isAlive) {
     await deviceHistoryModel.create({
       deviceId: host._id,
-      ip: host.ip,
-      name: host.name,
-      status: newIsAlive ? "UP" : "DOWN",
+      history: [
+        {
+          status: newIsAlive ? "UP" : "DOWN",
+          message: res.output,
+        }
+      ],
     });
 
     await deviceService.update(host.id, { isAlive: newIsAlive });
@@ -56,7 +59,8 @@ const checkDevice = async (host) => {
   let total = devicesStats.recentPings.length;
   let pingUp = devicesStats.recentPings.filter((p) => p.status === "UP").length;
   let pingDown = total - pingUp;
-  let promedio = total > 0 ? ((pingUp / total) * 100).toFixed(2) : 0;
+  let promedio = total > 0 ? (pingUp / total) * 100 : 0;
+  promedio = promedio.toFixed(promedio === 100 ? 0 : 2);
 
   io.emit("stats:update", {
     deviceId: host._id,

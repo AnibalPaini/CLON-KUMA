@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { getDeviceStats } from "../../APIS/deviceStatsAPI";
+import { getHistorial } from "../../APIS/deviceHistoryAPI.js";
 import { pauseDevice } from "../../APIS/deviceAPI.js";
 import { useSocket } from "../../hooks/useSocket.js";
 
 const DeviceInfo = ({ device, setActualizar }) => {
   const [stats, setStats] = useState();
+  const [historial, setHistorial] = useState();
   const [ms, setMs] = useState(0);
   const [isAlive, setIsAlive] = useState(device.isAlive);
   const [lastsPings, setLastsPings] = useState([]);
   const socket = useSocket();
   useEffect(() => {
     obtenerStats();
+    obtenerHistorial();
+
     if (!socket) return;
+    console.log("Conectado");
 
     // Suscripción a eventos
     socket.on("stats:update", (data) => {
@@ -34,6 +39,8 @@ const DeviceInfo = ({ device, setActualizar }) => {
     });
 
     return () => {
+      console.log("Deconectado");
+
       socket.off("stats:update");
       socket.off("device:update");
       socket.off("pings:update");
@@ -43,10 +50,19 @@ const DeviceInfo = ({ device, setActualizar }) => {
   const obtenerStats = async () => {
     try {
       const res = await getDeviceStats(device._id);
-      console.log(res.data.payload);
 
       setStats(res.data.payload);
       setMs(res.data.payload.ms);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const obtenerHistorial = async () => {
+    try {
+      const res = await getHistorial(device._id);
+      setHistorial(res.data.payload);
+      console.log(res.data.payload);
     } catch (error) {
       console.log(error);
     }
@@ -165,8 +181,70 @@ const DeviceInfo = ({ device, setActualizar }) => {
           Eliminar
         </button>
       </div>
-      <div>
-        <p>{ms}</p>
+      <div className="bg-gray-800 mt-5 rounded-2xl p-10 flex justify-evenly">
+        <div>
+          <p className="text-gray-100 text-xl text-center font-semibold">
+            Ultima Respuesta
+          </p>
+          <p className="text-center mt-2 text-lg text-gray-300">{ms}</p>
+        </div>
+        <div>
+          <p className="text-gray-100 text-xl text-center font-semibold">
+            Ultima Respuesta
+          </p>
+          <p className="text-center mt-2 text-lg text-gray-300">{ms}</p>
+        </div>
+        <div>
+          <p className="text-gray-100 text-xl text-center font-semibold">
+            Ultima Respuesta
+          </p>
+          <p className="text-center mt-2 text-lg text-gray-300">{ms}</p>
+        </div>
+        <div>
+          <p className="text-gray-100 text-xl text-center font-semibold">
+            Ultima Respuesta
+          </p>
+          <p className="text-center mt-2 text-lg text-gray-300">{ms}</p>
+        </div>
+      </div>
+      <div className="bg-gray-800 mt-5 rounded-2xl p-10 flex">
+        <table className="w-full table-auto border-collapse">
+          <thead>
+            <tr className="">
+              <th className="text-gray-100 px-4 py-2 text-left">Estado</th>
+              <th className="text-gray-100 px-4 py-2 text-left">
+                Fecha y hora
+              </th>
+              <th className="text-gray-100 px-4 py-2 text-left">Mensaje</th>
+            </tr>
+          </thead>
+          <tbody>
+            {historial?.flatMap((his) =>
+              his.history.map((entry, index) => (
+                <tr key={`${his._id}-${index}`}>
+                  <td className="text-white px-4 py-2 font-semibold">
+                    <span
+                      className={`inline-block px-2 py-1 rounded text-sm ${
+                        entry.status === "UP"
+                          ? "bg-green-600 text-white"
+                          : "bg-red-600 text-white"
+                      }`}
+                    >
+                      {entry.status}
+                    </span>
+                  </td>
+                  <td className="text-white px-4 py-2">
+                    {new Date(entry.time).toLocaleString()}
+                  </td>
+                  <td className="text-white px-4 py-2" title={entry.message}>
+                    {entry.message?.slice(0, 100) || "Sin mensaje"}
+                    {"..."}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

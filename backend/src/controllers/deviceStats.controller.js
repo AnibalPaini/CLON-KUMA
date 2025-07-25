@@ -9,7 +9,8 @@ export const getDeviceStatController = async (req, res) => {
     let total = stats.recentPings.length;
     let pingUp = stats.recentPings.filter((p) => p.status === "UP").length;
     let pingDown = total - pingUp;
-    let promedio = total > 0 ? ((pingUp / total) * 100).toFixed(2) : 0;
+    let promedio = total > 0 ? ((pingUp / total) * 100) : 0;
+    promedio= promedio.toFixed(promedio===100? 0:2)
     let paused= stats.deviceId.paused
 
 

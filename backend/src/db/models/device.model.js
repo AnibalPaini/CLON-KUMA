@@ -6,7 +6,10 @@ const DeviceSchema = mongoose.Schema(
     ip: { type: String, required: true },
     isAlive: { type: Boolean, default: false },
     isConnected: { type: Boolean, default: true },
-    paused:{type: Boolean, default: false}
+    paused:{type: Boolean, default: false},
+    notifications:{type: Boolean, default: true},
+    description:{type: String},
+    tag:{type: String}
   },
   { timestamp: true }
 );

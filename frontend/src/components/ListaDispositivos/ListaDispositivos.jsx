@@ -9,6 +9,7 @@ const ListaDispositivos = ({
   setActualizar,
 }) => {
   const [listaDevices, setListaDevices] = useState([]);
+
   useEffect(() => {
     obtenerDevices();
   }, [actualizar]);
@@ -76,20 +77,26 @@ const ListaDispositivos = ({
         </div>
       </div>
       <div className=" bg-gray-800 w-full px-2 py-4">
-        {
-        listaDevices.length!==0? 
-        listaDevices.map((device) => (
-          <div
-            onClick={() => {
-              onSelectDevice(device);
-              newDevice(false);
-            }}
-            key={device._id}
-            className="flex px-2 py-4 justify-between items-center cursor-pointer hover:bg-gray-600 w-full"
-          >
-            <Dispositivo device={device} actualizar={actualizar} setActualizar={setActualizar}/>
-          </div>
-        )): <p className="text-gray-100">No hay dispositivos agregados aún.</p>}
+        {listaDevices.length !== 0 ? (
+          listaDevices.map((device) => (
+            <div
+              onClick={() => {
+                onSelectDevice(device);
+                newDevice(false);
+              }}
+              className="flex px-2 py-4 justify-between items-center cursor-pointer hover:bg-gray-600 w-full"
+            >
+              <Dispositivo
+                key={device._id} // ✅ ahora la key está en el componente correcto
+                device={device}
+                actualizar={actualizar}
+                setActualizar={setActualizar}
+              />
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-100">No hay dispositivos agregados aún.</p>
+        )}
       </div>
     </section>
   );

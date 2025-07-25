@@ -1,0 +1,58 @@
+Escuchar los eventos de socket en el contexto global, para evitar desconectarlos.
+
+✅ SOLUCIÓN: Escuchar eventos en un solo lugar y distribuirlos
+Hay varias estrategias, pero la más limpia y mantenible es esta:
+
+🧩 Opción 1: Escuchar eventos globales en un SocketProvider (mejor práctica)
+Centraliza los eventos en un contexto global que mantenga todas las suscripciones y reparta la data con un Context. Esto es lo más escalable.
+
+Si no quieres hacer ese refactor ahora, entonces:
+
+🧩 Opción 2: Cambia socket.off(...) para que solo quite su propio handler
+El problema es que estás haciendo socket.off("stats:update"), que elimina todos los listeners de ese evento, incluso los de otros componentes.
+
+Debes hacer esto:
+
+js
+Copiar
+Editar
+// 👇 En lugar de esto (malo):
+socket.off("stats:update");
+
+// 👇 Haz esto (bueno):
+socket.off("stats:update", handleStats);
+Haz esto para todos los eventos:
+
+En DeviceInfo:
+js
+Copiar
+Editar
+return () => {
+  console.log("Deconectado");
+
+  socket.off("stats:update", handleStats);
+  socket.off("device:update", handleDevice);
+  socket.off("pings:update", handlePings);
+};
+Y define tus handlers fuera del socket.on(...):
+
+js
+Copiar
+Editar
+const handleStats = (data) => {
+  if (data.deviceId === device._id) {
+    setStats((prev) => ({ ...prev, promedio: data.promedio }));
+    setMs(data.ms);
+  }
+};
+
+// etc.
+En Dispositivo:
+Ya lo haces bien 👏, porque tus off(...) especifican el handler exacto.
+
+✅ Resultado:
+Ahora cada componente gestiona sus propios listeners y no interfiere con los demás.
+
+Esto es clave en aplicaciones con múltiples vistas o paneles simultáneos escuchando los mismos sockets.
+
+¿Quieres que te ayude a extraer los handlers (handleStats, etc.) en DeviceInfo como ya lo haces en Dispositivo para que puedas copiar y pegar directamente?

@@ -5,6 +5,7 @@ import http from "http";
 import connectDB from "./db/connectDB.js";
 import deviceRouter from "./routes/device.router.js";
 import deviceStatsRouter from "./routes/deviceStats.router.js";
+import deviceHistoryRouter from "./routes/deviceHistory.router.js";
 import pings from "./utils/ping.js";
 
 const app = express();
@@ -38,6 +39,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/devices", deviceRouter);
+app.use("/api/devicesHistory", deviceHistoryRouter);
 app.use("/api/devicesStats", deviceStatsRouter);
 
 server.listen(port, () => {
