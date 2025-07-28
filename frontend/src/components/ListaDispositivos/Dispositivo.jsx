@@ -1,59 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { getDeviceStats } from "../../APIS/deviceStatsAPI.js";
 import { useSocket } from "../../hooks/useSocket.js";
+import { useSocketData } from "../../context/SocketDataContext";
 
 const Dispositivo = ({ device, setActualizar, actualizar }) => {
   const [stats, setStats] = useState();
   const [isAlive, setIsAlive] = useState(device.isAlive);
   const [lastsPings, setLastsPings] = useState([]);
+
   const socket = useSocket();
+  const { deviceStats, deviceStates, devicePings } = useSocketData();
 
   useEffect(() => {
     obtenerStats();
+  }, [actualizar, device._id]);
 
+  useEffect(() => {
     if (!socket) return;
 
-    console.log(`Conectado eventos para dispositivo ${device.name}`);
-    const handleStats = (data) => {
-      if (data.deviceId === device._id) {
-        console.log("📊 Recibido stats", data);
-        setStats((prev) => ({ ...prev, promedio: data.promedio }));
-      }
-    };
+    const newStats = deviceStats[device._id];
+    if (newStats) {
+      setStats((prevStats) => ({
+        ...newStats,
+        paused: prevStats?.paused ?? false, 
+      }));
+    }
 
-    const handleDevice = (data) => {
-      if (data.deviceId === device._id) {
-        console.log("⚡ Estado actualizado", data);
-        setIsAlive(data.isAlive);
-      }
-    };
-
-    const handlePings = (data) => {
-      if (data.deviceId === device._id) {
-        console.log("📶 Nuevos pings", data);
-        setLastsPings(data.lastsPings);
-      }
-    };
-
-    socket.on("stats:update", handleStats);
-    socket.on("device:update", handleDevice);
-    socket.on("pings:update", handlePings);
-    return () => {
-      console.log(`Desconectando eventos para dispositivo ${device.name}`);
-      socket.off("stats:update", handleStats);
-      socket.off("device:update", handleDevice);
-      socket.off("pings:update", handlePings);
-    };
-  }, [socket,device, actualizar]);
+    setIsAlive(deviceStates[device._id]);
+    setLastsPings(devicePings[device._id] ?? []);
+  }, [socket, device._id, deviceStats, deviceStates, devicePings]);
 
   const obtenerStats = async () => {
     try {
       const res = await getDeviceStats(device._id);
       setStats(res.data.payload);
     } catch (error) {
-      console.log(error);
+      console.error("Error al obtener stats:", error);
     } finally {
-      setActualizar(false);
+      if (setActualizar) setActualizar(false);
     }
   };
 
@@ -61,7 +45,7 @@ const Dispositivo = ({ device, setActualizar, actualizar }) => {
     <>
       <div className="flex gap-x-2 items-center">
         <span
-          className={`rounded-xl w-15 text-center ${
+          className={`rounded-xl w-16 text-center px-2 py-1 font-medium ${
             stats?.paused
               ? "bg-gray-400 text-black"
               : isAlive
@@ -74,10 +58,10 @@ const Dispositivo = ({ device, setActualizar, actualizar }) => {
         <p className="text-lg text-gray-200">{device.name}</p>
         <p className="text-lg text-gray-200">{device.ip}</p>
       </div>
-      <div className="flex space-x-1">
+      <div className="flex space-x-1 mt-1">
         {(stats?.paused
           ? Array(20).fill({ status: "PAUSED" })
-          : lastsPings
+          : lastsPings ?? []
         ).map((ping, index) => (
           <span
             key={index}
@@ -88,7 +72,7 @@ const Dispositivo = ({ device, setActualizar, actualizar }) => {
                 ? "bg-red-500"
                 : "bg-gray-400"
             }`}
-          ></span>
+          />
         ))}
       </div>
     </>

@@ -6,7 +6,7 @@ const deviceStatsSchema = mongoose.Schema({
     {
       status: { type: String, enum: ["UP", "DOWN"] },
       ms:{type: String, default:0},
-      timestamp: { type: Date, default: Date.now },
+      timestamp: { type: Date, default: new Date() },
     }
   ],
 }, { timestamps: true });

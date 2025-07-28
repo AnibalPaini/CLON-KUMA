@@ -14,6 +14,8 @@ export const getDevicesController = async (req, res) => {
 export const postDevicesController = async (req, res) => {
   try {
     const { name, ip, isConnected, notifications, description, tag } = req.body;
+    console.log({ name, ip, isConnected, notifications, description, tag });
+    
     const exist = await deviceService.getByIp(ip);
     if (exist)
       return res.status(400).send({ error: "Dispositivo ya existente!" });

@@ -5,7 +5,7 @@ import DeviceService from "../services/device.service.js";
 import { io } from "../app.js";
 const deviceService = new DeviceService();
 
-const timePing = 5 * 1000; //5seg
+const timePing = 60 * 1000; //1min
 
 const pings = () => {
   setInterval(async () => {
@@ -36,28 +36,35 @@ const checkDevice = async (host) => {
         {
           status: newIsAlive ? "UP" : "DOWN",
           message: res.output,
-        }
+        },
       ],
     });
 
     await deviceService.update(host.id, { isAlive: newIsAlive });
   }
 
-  if (devicesStats.recentPings.length >= 50) {
-    devicesStats.recentPings.shift();
-  }
+  await deviceStatsModel.updateOne(
+    { deviceId: host._id },
+    {
+      $push: {
+        recentPings: {
+          $each: [
+            {
+              status: newIsAlive ? "UP" : "DOWN",
+              timestamp: new Date(),
+              ms: res.avg === "unknown" ? null : parseFloat(res.avg),
+            },
+          ],
+          $slice: -1440, // mantiene los últimos 1440 (24hs)
+        },
+      },
+    }
+  );
 
-  devicesStats.recentPings.push({
-    status: newIsAlive ? "UP" : "DOWN",
-    timestamp: new Date(),
-    ms: res.avg === "unknown" ? "Not Response" : res.avg,
-  });
+  let updatedStats = await deviceStatsModel.findOne({ deviceId: host._id });
 
-  await devicesStats.save();
-
-  // Calcular porcentaje de pings UP
-  let total = devicesStats.recentPings.length;
-  let pingUp = devicesStats.recentPings.filter((p) => p.status === "UP").length;
+  let total = updatedStats.recentPings.length;
+  let pingUp = updatedStats.recentPings.filter((p) => p.status === "UP").length;
   let pingDown = total - pingUp;
   let promedio = total > 0 ? (pingUp / total) * 100 : 0;
   promedio = promedio.toFixed(promedio === 100 ? 0 : 2);
@@ -73,7 +80,7 @@ const checkDevice = async (host) => {
     isAlive: newIsAlive,
   });
 
-  let lastsPings = devicesStats.recentPings.slice(-20);
+  let lastsPings = updatedStats.recentPings.slice(-20);
 
   io.emit("pings:update", {
     deviceId: host._id,

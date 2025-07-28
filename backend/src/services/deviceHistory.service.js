@@ -3,6 +3,6 @@ export default class DeviceHistoryService {
   constructor() {}
 
   findById = async (id) => {
-    return await deviceHistoryModel.find({deviceId:id});
+    return await deviceHistoryModel.find({ deviceId: id }).sort({ time: 1 });
   };
 }

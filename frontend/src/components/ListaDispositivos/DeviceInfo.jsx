@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { getDeviceStats } from "../../APIS/deviceStatsAPI";
+import { getDeviceStats, getPromediosDevices } from "../../APIS/deviceStatsAPI";
 import { getHistorial } from "../../APIS/deviceHistoryAPI.js";
-import { pauseDevice } from "../../APIS/deviceAPI.js";
+import { pauseDevice, deleteDevices } from "../../APIS/deviceAPI.js";
 import { useSocket } from "../../hooks/useSocket.js";
+import { useSocketData } from "../../context/SocketDataContext";
 
 const DeviceInfo = ({ device, setActualizar }) => {
   const [stats, setStats] = useState();
@@ -10,49 +11,38 @@ const DeviceInfo = ({ device, setActualizar }) => {
   const [ms, setMs] = useState(0);
   const [isAlive, setIsAlive] = useState(device.isAlive);
   const [lastsPings, setLastsPings] = useState([]);
+  const [promedio, setPromedio] = useState();
   const socket = useSocket();
+  const { deviceStats, deviceStates, devicePings, deviceMs } = useSocketData();
+
   useEffect(() => {
     obtenerStats();
     obtenerHistorial();
+    obtenerPromedios();
+  }, [device._id]);
 
+  useEffect(() => {
     if (!socket) return;
-    console.log("Conectado");
-
-    // Suscripción a eventos
-    socket.on("stats:update", (data) => {
-      if (data.deviceId === device._id) {
-        setStats((prev) => ({ ...prev, promedio: data.promedio }));
-        setMs(data.ms);
-      }
-    });
-
-    socket.on("device:update", (data) => {
-      if (data.deviceId === device._id) {
-        setIsAlive(data.isAlive);
-      }
-    });
-
-    socket.on("pings:update", (data) => {
-      if (data.deviceId === device._id) {
-        setLastsPings(data.lastsPings);
-      }
-    });
-
-    return () => {
-      console.log("Deconectado");
-
-      socket.off("stats:update");
-      socket.off("device:update");
-      socket.off("pings:update");
-    };
-  }, [device._id, socket]);
+    setStats(deviceStats[device._id]);
+    setIsAlive(deviceStates[device._id]);
+    setLastsPings(devicePings[device._id]);
+    setMs(deviceMs[device._id]);
+  }, [socket, deviceStats, deviceStates, devicePings, deviceMs]);
 
   const obtenerStats = async () => {
     try {
       const res = await getDeviceStats(device._id);
-
       setStats(res.data.payload);
       setMs(res.data.payload.ms);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const obtenerPromedios = async () => {
+    try {
+      const res = await getPromediosDevices(device._id);
+      setPromedio(res.data.payload);
+      console.log(res.data.payload);
     } catch (error) {
       console.log(error);
     }
@@ -62,7 +52,6 @@ const DeviceInfo = ({ device, setActualizar }) => {
     try {
       const res = await getHistorial(device._id);
       setHistorial(res.data.payload);
-      console.log(res.data.payload);
     } catch (error) {
       console.log(error);
     }
@@ -71,6 +60,16 @@ const DeviceInfo = ({ device, setActualizar }) => {
   const handlerPauseDevice = async () => {
     try {
       await pauseDevice(device._id);
+      setActualizar(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handlerDeleteDevice = async () => {
+    try {
+      confirm("Esta seguro que quiere eliminarlo?");
+      await deleteDevices(device._id);
       setActualizar(true);
     } catch (error) {
       console.log(error);
@@ -124,33 +123,36 @@ const DeviceInfo = ({ device, setActualizar }) => {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
             <g
               id="SVGRepo_tracerCarrier"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             ></g>
             <g id="SVGRepo_iconCarrier">
               {" "}
               <path
                 d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C17.8754 2.49308 18.1605 2.28654 18.4781 2.14284C18.7956 1.99914 19.139 1.92124 19.4875 1.9139C19.8359 1.90657 20.1823 1.96991 20.5056 2.10012C20.8289 2.23033 21.1225 2.42473 21.3686 2.67153C21.6147 2.91833 21.8083 3.21243 21.9376 3.53609C22.0669 3.85976 22.1294 4.20626 22.1211 4.55471C22.1128 4.90316 22.0339 5.24635 21.8894 5.5635C21.7448 5.88065 21.5375 6.16524 21.2799 6.40005V6.40005Z"
                 stroke="#99a1af"
-                stroke-width="3.4"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth="3.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               ></path>{" "}
               <path
                 d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13"
                 stroke="#99a1af"
-                stroke-width="3.4"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth="3.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               ></path>{" "}
             </g>
           </svg>
           Editar
         </button>
-        <button className="flex items-center gap-x-1 bg-red-600 cursor-pointer py-2 px-4 rounded-r-2xl text-gray-50 hover:bg-red-700">
+        <button
+          className="flex items-center gap-x-1 bg-red-600 cursor-pointer py-2 px-4 rounded-r-2xl text-gray-50 hover:bg-red-700"
+          onClick={handlerDeleteDevice}
+        >
           <svg
             width="16px"
             height="16px"
@@ -158,13 +160,13 @@ const DeviceInfo = ({ device, setActualizar }) => {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             stroke="#ffffff"
-            stroke-width="2.4"
+            strokeWidth="2.4"
           >
-            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
             <g
               id="SVGRepo_tracerCarrier"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             ></g>
             <g id="SVGRepo_iconCarrier">
               {" "}
@@ -184,67 +186,77 @@ const DeviceInfo = ({ device, setActualizar }) => {
       <div className="bg-gray-800 mt-5 rounded-2xl p-10 flex justify-evenly">
         <div>
           <p className="text-gray-100 text-xl text-center font-semibold">
-            Ultima Respuesta
+            Respuesta
           </p>
-          <p className="text-center mt-2 text-lg text-gray-300">{ms}</p>
+          <p className="text-gray-300 text-center">(Ultima)</p>
+          <p className="text-center mt-2 text-lg text-gray-300">{ms || "Not Response"}</p>
         </div>
         <div>
           <p className="text-gray-100 text-xl text-center font-semibold">
-            Ultima Respuesta
+            Repuesta promedio
           </p>
-          <p className="text-center mt-2 text-lg text-gray-300">{ms}</p>
+          <p className="text-gray-300 text-center">(1h)</p>
+          <p className="text-center mt-2 text-lg text-gray-300">
+            {promedio?.avgLastHour}
+          </p>
         </div>
         <div>
           <p className="text-gray-100 text-xl text-center font-semibold">
-            Ultima Respuesta
+            Repuesta promedio
           </p>
-          <p className="text-center mt-2 text-lg text-gray-300">{ms}</p>
+          <p className="text-gray-300 text-center">(24hs)</p>
+          <p className="text-center mt-2 text-lg text-gray-300">
+            {promedio?.avgLastDay}
+          </p>
         </div>
         <div>
           <p className="text-gray-100 text-xl text-center font-semibold">
-            Ultima Respuesta
+            Caidas
           </p>
-          <p className="text-center mt-2 text-lg text-gray-300">{ms}</p>
+          <p className="text-gray-300 text-center">(24hs)</p>
+          <p className="text-center mt-2 text-lg text-gray-300">{promedio?.avgLastDowns}</p>
         </div>
       </div>
       <div className="bg-gray-800 mt-5 rounded-2xl p-10 flex">
-        <table className="w-full table-auto border-collapse">
-          <thead>
-            <tr className="">
-              <th className="text-gray-100 px-4 py-2 text-left">Estado</th>
-              <th className="text-gray-100 px-4 py-2 text-left">
-                Fecha y hora
-              </th>
-              <th className="text-gray-100 px-4 py-2 text-left">Mensaje</th>
-            </tr>
-          </thead>
-          <tbody>
-            {historial?.flatMap((his) =>
-              his.history.map((entry, index) => (
-                <tr key={`${his._id}-${index}`}>
-                  <td className="text-white px-4 py-2 font-semibold">
-                    <span
-                      className={`inline-block px-2 py-1 rounded text-sm ${
-                        entry.status === "UP"
-                          ? "bg-green-600 text-white"
-                          : "bg-red-600 text-white"
-                      }`}
-                    >
-                      {entry.status}
-                    </span>
-                  </td>
-                  <td className="text-white px-4 py-2">
-                    {new Date(entry.time).toLocaleString()}
-                  </td>
-                  <td className="text-white px-4 py-2" title={entry.message}>
-                    {entry.message?.slice(0, 100) || "Sin mensaje"}
-                    {"..."}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+        <div className="overflow-auto max-h-96 w-full">
+          <table className="w-full table-auto border-collapse overflow-y-auto max-h-96">
+            <thead>
+              <tr className="">
+                <th className="text-gray-100 px-4 py-2 text-left">Estado</th>
+                <th className="text-gray-100 px-4 py-2 text-left">
+                  Fecha y hora
+                </th>
+                <th className="text-gray-100 px-4 py-2 text-left">Mensaje</th>
+              </tr>
+            </thead>
+            <tbody>
+              {historial?.flatMap((his) =>
+                his.history.map((entry, index) => (
+                  <tr key={`${his._id}-${index}`}>
+                    <td className="text-white px-4 py-2 font-semibold">
+                      <span
+                        className={`inline-block px-2 py-1 rounded text-sm ${
+                          entry.status === "UP"
+                            ? "bg-green-600 text-white"
+                            : "bg-red-600 text-white"
+                        }`}
+                      >
+                        {entry.status}
+                      </span>
+                    </td>
+                    <td className="text-white px-4 py-2">
+                      {new Date(entry.time).toLocaleString()}
+                    </td>
+                    <td className="text-white px-4 py-2" title={entry.message}>
+                      {entry.message?.slice(0, 100) || "Sin mensaje"}
+                      {"..."}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

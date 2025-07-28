@@ -1,14 +1,16 @@
-import { SocketProvider } from './context/SocketProvider.jsx'
-import './App.css'
-import Template from './components/Template'
+import { SocketProvider } from "./context/SocketProvider.jsx";
+import { SocketDataProvider } from "./context/SocketDataContext.jsx";
+import "./App.css";
+import Template from "./components/Template";
 
 function App() {
-
   return (
     <SocketProvider>
-      <Template></Template>
+      <SocketDataProvider>
+        <Template />
+      </SocketDataProvider>
     </SocketProvider>
-  )
+  );
 }
 
-export default App
+export default App;

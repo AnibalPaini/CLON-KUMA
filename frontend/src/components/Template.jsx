@@ -23,7 +23,7 @@ const Template = () => {
           {selectedDevice ? (
             <DeviceInfo device={selectedDevice} setActualizar={setActualizar} />
           ) : newDevice ? (
-            <AgregarDevice></AgregarDevice>
+            <AgregarDevice setActualizar={setActualizar}></AgregarDevice>
           ) : (
             <AllDevices></AllDevices>
           )}

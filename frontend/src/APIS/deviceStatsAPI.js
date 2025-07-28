@@ -6,3 +6,6 @@ export const getDeviceStats= async(id)=>{
     return await axios.get(`${URL}/${id}`)
 }
 
+export const getPromediosDevices= async(id)=>{
+    return await axios.get(`${URL}/${id}/promedios`)
+}

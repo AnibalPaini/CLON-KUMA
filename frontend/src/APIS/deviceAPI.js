@@ -7,7 +7,7 @@ export const getDevices = async () => {
 };
 
 export const postDevices = async (datos) => {
-  return await axios.post(`${URL}/`, { datos });
+  return await axios.post(`${URL}/`, datos);
 };
 
 export const putDevices = async (id) => {

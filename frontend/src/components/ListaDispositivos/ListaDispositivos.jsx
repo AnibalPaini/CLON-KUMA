@@ -85,9 +85,10 @@ const ListaDispositivos = ({
                 newDevice(false);
               }}
               className="flex px-2 py-4 justify-between items-center cursor-pointer hover:bg-gray-600 w-full"
+              key={device._id}
             >
               <Dispositivo
-                key={device._id} // ✅ ahora la key está en el componente correcto
+                key={device._id}
                 device={device}
                 actualizar={actualizar}
                 setActualizar={setActualizar}
