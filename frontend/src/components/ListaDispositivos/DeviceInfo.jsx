@@ -189,7 +189,9 @@ const DeviceInfo = ({ device, setActualizar }) => {
             Respuesta
           </p>
           <p className="text-gray-300 text-center">(Ultima)</p>
-          <p className="text-center mt-2 text-lg text-gray-300">{ms || "Not Response"}</p>
+          <p className="text-center mt-2 text-lg text-gray-300">
+            {ms || "Not Response"}
+          </p>
         </div>
         <div>
           <p className="text-gray-100 text-xl text-center font-semibold">
@@ -214,13 +216,15 @@ const DeviceInfo = ({ device, setActualizar }) => {
             Caidas
           </p>
           <p className="text-gray-300 text-center">(24hs)</p>
-          <p className="text-center mt-2 text-lg text-gray-300">{promedio?.avgLastDowns}</p>
+          <p className="text-center mt-2 text-lg text-gray-300">
+            {promedio?.avgLastDowns}
+          </p>
         </div>
       </div>
       <div className="bg-gray-800 mt-5 rounded-2xl p-10 flex">
         <div className="overflow-auto max-h-96 w-full">
           <table className="w-full table-auto border-collapse overflow-y-auto max-h-96">
-            {historial.length!==0 &&
+            {historial.length !== 0 && (
               <thead>
                 <tr className="">
                   <th className="text-gray-100 px-4 py-2 text-left">Estado</th>
@@ -230,33 +234,41 @@ const DeviceInfo = ({ device, setActualizar }) => {
                   <th className="text-gray-100 px-4 py-2 text-left">Mensaje</th>
                 </tr>
               </thead>
-            }
+            )}
             <tbody>
-              {historial.length!==0?
-              historial?.flatMap((his) =>
-                his.history.map((entry, index) => (
-                  <tr key={`${his._id}-${index}`}>
-                    <td className="text-white px-4 py-2 font-semibold">
-                      <span
-                        className={`inline-block px-2 py-1 rounded text-sm ${
-                          entry.status === "UP"
-                            ? "bg-green-600 text-white"
-                            : "bg-red-600 text-white"
-                        }`}
+              {historial.length !== 0 ? (
+                historial?.flatMap((his) =>
+                  his.history.map((entry, index) => (
+                    <tr key={`${his._id}-${index}`}>
+                      <td className="text-white px-4 py-2 font-semibold">
+                        <span
+                          className={`inline-block px-2 py-1 rounded text-sm ${
+                            entry.status === "UP"
+                              ? "bg-green-600 text-white"
+                              : "bg-red-600 text-white"
+                          }`}
+                        >
+                          {entry.status}
+                        </span>
+                      </td>
+                      <td className="text-white px-4 py-2">
+                        {new Date(entry.time).toLocaleString()}
+                      </td>
+                      <td
+                        className="text-white px-4 py-2"
+                        title={entry.message}
                       >
-                        {entry.status}
-                      </span>
-                    </td>
-                    <td className="text-white px-4 py-2">
-                      {new Date(entry.time).toLocaleString()}
-                    </td>
-                    <td className="text-white px-4 py-2" title={entry.message}>
-                      {entry.message?.slice(0, 100) || "Sin mensaje"}
-                      {"..."}
-                    </td>
-                  </tr>
-                ))
-              ):<p className="text-gray-100 text-xl">No hay datos del historial...</p>}
+                        {entry.message?.slice(0, 100) || "Sin mensaje"}
+                        {"..."}
+                      </td>
+                    </tr>
+                  ))
+                )
+              ) : (
+                <p className="text-gray-100 text-xl">
+                  No hay datos del historial...
+                </p>
+              )}
             </tbody>
           </table>
         </div>

@@ -18,6 +18,8 @@ const ListaDispositivos = ({
     try {
       const res = await getDevices();
       setListaDevices(res.data.payload);
+      console.log("Estadisticas obtenidos");
+      console.log(res.data.payload);
     } catch (error) {
       console.log(error);
     }

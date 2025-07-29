@@ -30,3 +30,4 @@ if (newIsAlive !== host.isAlive) {
 
 
 - Obtener los datos del historial y formatearlos asi aparecen los más nuevos arriba, puede ser con un timestamp y por fecha de modificación.
+- En Dispositivo debo obtener los estados iniciales asi cargarn los estilos

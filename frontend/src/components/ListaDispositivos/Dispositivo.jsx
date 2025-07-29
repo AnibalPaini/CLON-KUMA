@@ -22,7 +22,7 @@ const Dispositivo = ({ device, setActualizar, actualizar }) => {
     if (newStats) {
       setStats((prevStats) => ({
         ...newStats,
-        paused: prevStats?.paused ?? false, 
+        paused: prevStats?.paused ?? false,
       }));
     }
 
