@@ -29,7 +29,7 @@ const checkDevice = async (host) => {
   const newIsAlive = res.alive;
   //console.log(`${host.ip}`);
 
-  if (newIsAlive !== host.isAlive) {
+  /* if (newIsAlive !== host.isAlive) {
     await deviceHistoryModel.create({
       deviceId: host._id,
       history: [
@@ -39,6 +39,32 @@ const checkDevice = async (host) => {
         },
       ],
     });
+
+    await deviceService.update(host.id, { isAlive: newIsAlive });
+  } */
+
+  if (newIsAlive !== host.isAlive) {
+    const existingHistory = await deviceHistoryModel.findOne({
+      deviceId: host._id,
+    });
+
+    const historyEntry = {
+      status: newIsAlive ? "UP" : "DOWN",
+      message: res.output,
+      time: new Date(),
+    };
+
+    if (existingHistory) {
+      await deviceHistoryModel.updateOne(
+        { deviceId: host._id },
+        { $push: { history: [historyEntry], $slice: -50 } }
+      );
+    } else {
+      await deviceHistoryModel.create({
+        deviceId: host._id,
+        history: [historyEntry],
+      });
+    }
 
     await deviceService.update(host.id, { isAlive: newIsAlive });
   }
@@ -68,6 +94,9 @@ const checkDevice = async (host) => {
   let pingDown = total - pingUp;
   let promedio = total > 0 ? (pingUp / total) * 100 : 0;
   promedio = promedio.toFixed(promedio === 100 ? 0 : 2);
+
+  
+  
 
   io.emit("stats:update", {
     deviceId: host._id,

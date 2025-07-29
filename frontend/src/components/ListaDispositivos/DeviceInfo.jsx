@@ -7,7 +7,7 @@ import { useSocketData } from "../../context/SocketDataContext";
 
 const DeviceInfo = ({ device, setActualizar }) => {
   const [stats, setStats] = useState();
-  const [historial, setHistorial] = useState();
+  const [historial, setHistorial] = useState([]);
   const [ms, setMs] = useState(0);
   const [isAlive, setIsAlive] = useState(device.isAlive);
   const [lastsPings, setLastsPings] = useState([]);
@@ -220,17 +220,20 @@ const DeviceInfo = ({ device, setActualizar }) => {
       <div className="bg-gray-800 mt-5 rounded-2xl p-10 flex">
         <div className="overflow-auto max-h-96 w-full">
           <table className="w-full table-auto border-collapse overflow-y-auto max-h-96">
-            <thead>
-              <tr className="">
-                <th className="text-gray-100 px-4 py-2 text-left">Estado</th>
-                <th className="text-gray-100 px-4 py-2 text-left">
-                  Fecha y hora
-                </th>
-                <th className="text-gray-100 px-4 py-2 text-left">Mensaje</th>
-              </tr>
-            </thead>
+            {historial.length!==0 &&
+              <thead>
+                <tr className="">
+                  <th className="text-gray-100 px-4 py-2 text-left">Estado</th>
+                  <th className="text-gray-100 px-4 py-2 text-left">
+                    Fecha y hora
+                  </th>
+                  <th className="text-gray-100 px-4 py-2 text-left">Mensaje</th>
+                </tr>
+              </thead>
+            }
             <tbody>
-              {historial?.flatMap((his) =>
+              {historial.length!==0?
+              historial?.flatMap((his) =>
                 his.history.map((entry, index) => (
                   <tr key={`${his._id}-${index}`}>
                     <td className="text-white px-4 py-2 font-semibold">
@@ -253,7 +256,7 @@ const DeviceInfo = ({ device, setActualizar }) => {
                     </td>
                   </tr>
                 ))
-              )}
+              ):<p className="text-gray-100 text-xl">No hay datos del historial...</p>}
             </tbody>
           </table>
         </div>

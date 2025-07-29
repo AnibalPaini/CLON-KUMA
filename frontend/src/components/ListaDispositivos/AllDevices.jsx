@@ -1,46 +1,41 @@
 import React, { useEffect, useState } from "react";
 import { getDevices } from "../../APIS/deviceAPI.js";
 import { useSocket } from "../../hooks/useSocket.js";
+import { useSocketData } from "../../context/SocketDataContext";
 
 const AllDevices = () => {
-  const [connected, setConnected] = useState(0);
+  const [alive, setAlive] = useState(0); // antes isAlive
   const [disconnected, setDisconnected] = useState(0);
   const [paused, setPaused] = useState(0);
   const socket = useSocket();
+  const { deviceStates } = useSocketData();
 
   useEffect(() => {
     obtenerDevices();
 
-    if (!socket) {
-      return;
-    }
-
-    socket.on("pings:connected", (data) => {
-      setConnected(data.connected);
-      setDisconnected(data.disconnected);
-    });
-
-    return () => {
-      socket.off("pings:connected");
-    };
-  }, [socket]);
+    if (!socket) return;
+  }, [socket, deviceStates]);
 
   const obtenerDevices = async () => {
     try {
       const res = await getDevices();
-      let devices = res.data.payload;
-      let devicesConnected = devices.filter(
-        (device) => device.isConnected === true && device.paused === false
+      const devices = res.data.payload;
+
+      const aliveDevices = devices.filter(
+        (device) => device.isAlive === true && device.paused === false
       ).length;
-      let devicesPaused = devices.filter(
+
+      const pausedDevices = devices.filter(
         (device) => device.paused === true
       ).length;
-      let devicesDisconnected = devices.filter(
-        (device) => device.isConnected === false
+
+      const disconnectedDevices = devices.filter(
+        (device) => device.isAlive === false
       ).length;
-      setConnected(devicesConnected);
-      setDisconnected(devicesDisconnected);
-      setPaused(devicesPaused);
+
+      setAlive(aliveDevices);
+      setPaused(pausedDevices);
+      setDisconnected(disconnectedDevices);
     } catch (error) {
       console.log(error);
     }
@@ -53,8 +48,8 @@ const AllDevices = () => {
       </h2>
       <div className="flex justify-between items-center gap-4">
         <div className="flex-1 bg-green-600 p-4 rounded-xl shadow-md flex flex-col items-center">
-          <span className="text-3xl font-bold">{connected}</span>
-          <p className="text-md mt-1">Conectados</p>
+          <span className="text-3xl font-bold">{alive}</span>
+          <p className="text-md mt-1">Funcionales</p>
         </div>
         <div className="flex-1 bg-gray-600 p-4 rounded-xl shadow-md flex flex-col items-center">
           <span className="text-3xl font-bold">{paused}</span>
@@ -62,7 +57,7 @@ const AllDevices = () => {
         </div>
         <div className="flex-1 bg-red-600 p-4 rounded-xl shadow-md flex flex-col items-center">
           <span className="text-3xl font-bold">{disconnected}</span>
-          <p className="text-md mt-1">Desconectados</p>
+          <p className="text-md mt-1">Caído</p>
         </div>
       </div>
     </section>
