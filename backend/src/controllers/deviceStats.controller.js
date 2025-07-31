@@ -59,14 +59,31 @@ export const getDevicesPromedios = async (req, res) => {
         : 0;
     //----------------
 
-    const avgLastDowns= (stats.recentPings.filter(
-      (p) => (p.status === "DOWN")).length
-    );
-    
+    const avgLastDowns = stats.recentPings.filter(
+      (p) => p.status === "DOWN"
+    ).length;
 
-    res.status(200).send({ payload: { avgLastDay, avgLastHour, avgLastDowns } });
+    res
+      .status(200)
+      .send({ payload: { avgLastDay, avgLastHour, avgLastDowns } });
   } catch (error) {
     res.status(500).send("Error en el servidor.");
     console.log(error);
+  }
+};
+
+export const getLastsPings = async (req, res) => {
+  try {
+    const { did } = req.params;
+    const device = await deviceStatsService.getByDeviceId(did);
+    if (!device) {
+      return res.status(404).send({error:"Not Found"})
+    }
+    const lastsPings= device.recentPings.slice(-20)
+
+    res.send({status:"Success", payload:lastsPings});
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Error")
   }
 };

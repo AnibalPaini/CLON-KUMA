@@ -5,7 +5,7 @@ import { pauseDevice, deleteDevices } from "../../APIS/deviceAPI.js";
 import { useSocket } from "../../hooks/useSocket.js";
 import { useSocketData } from "../../context/SocketDataContext";
 
-const DeviceInfo = ({ device, setActualizar }) => {
+const DeviceInfo = ({ device, setActualizar, setUpdateDevice }) => {
   const [stats, setStats] = useState();
   const [historial, setHistorial] = useState([]);
   const [ms, setMs] = useState(0);
@@ -115,7 +115,7 @@ const DeviceInfo = ({ device, setActualizar }) => {
           </svg>
           Pausar
         </button>
-        <button className="flex items-center gap-x-1 cursor-pointer py-2 px-4 bg-gray-800 hover:bg-gray-900">
+        <button className="flex items-center gap-x-1 cursor-pointer py-2 px-4 bg-gray-800 hover:bg-gray-900" onClick={()=>{setUpdateDevice(device); }}>
           <svg
             width="16px"
             height="16px"

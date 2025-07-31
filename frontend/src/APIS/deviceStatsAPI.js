@@ -9,3 +9,8 @@ export const getDeviceStats= async(id)=>{
 export const getPromediosDevices= async(id)=>{
     return await axios.get(`${URL}/${id}/promedios`)
 }
+
+export const getLastsPings= async(id)=>{
+    return await axios.get(`${URL}/pings/${id}`)
+}
+

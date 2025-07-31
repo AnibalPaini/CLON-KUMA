@@ -7,6 +7,7 @@ const ListaDispositivos = ({
   newDevice,
   actualizar,
   setActualizar,
+  setUpdateDevice
 }) => {
   const [listaDevices, setListaDevices] = useState([]);
 
@@ -33,6 +34,7 @@ const ListaDispositivos = ({
             onClick={() => {
               newDevice(true);
               onSelectDevice(null);
+              setUpdateDevice(null)
             }}
             className="px-4 py-1 bg-green-400 rounded-2xl text-gray-900 font-semibold flex items-center cursor-pointer transition-colors hover:bg-green-500"
           >
@@ -85,6 +87,7 @@ const ListaDispositivos = ({
               onClick={() => {
                 onSelectDevice(device);
                 newDevice(false);
+                setUpdateDevice(null)
               }}
               className="flex px-2 py-4 justify-between items-center cursor-pointer hover:bg-gray-600 w-full"
               key={device._id}

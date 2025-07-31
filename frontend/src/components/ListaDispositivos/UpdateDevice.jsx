@@ -1,53 +1,52 @@
-import React from "react";
-import { postDevices } from "../APIS/deviceAPI";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { putDevices } from "../../APIS/deviceAPI";
 
-const AgregarDevice = ({ setActualizar}) => {
-  const [formCreateDevice, setFormCreateDevice] = useState({
+const UpdateDevice = ({ updateDevice, setUpdateDevice }) => {
+  const [formUpdateDevice, setFormUpdateDevice] = useState({
     ip: "",
     name: "",
-    isConnected: "",
-    notifications: "",
+    isConnected: false,
+    notifications: false,
     description: "",
     tag: "",
   });
 
-  const crearDevice = async () => {
-    try {
-      await postDevices(formCreateDevice);
-      setActualizar(true);
-      setFormCreateDevice({
-        ip: "",
-        name: "",
-        isConnected: "",
-        notifications: "",
-        description: "",
-        tag: "",
+  useEffect(() => {
+    if (updateDevice) {
+      setFormUpdateDevice({
+        ip: updateDevice.ip || "",
+        name: updateDevice.name || "",
+        isConnected: updateDevice.isConnected || false,
+        notifications: updateDevice.notifications || false,
+        description: updateDevice.description || "",
+        tag: updateDevice.tag || "",
       });
-    } catch (error) {
-      console.log(error);
     }
-  };
+  }, [updateDevice]);
 
-  const handlerCreateDeviceForm = (e) => {
+  const handlerUpdateDeviceForm = (e) => {
     const { name, type, value, checked } = e.target;
 
-    setFormCreateDevice((prev) => ({
+    setFormUpdateDevice((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
+  const actualizarDevice = async () => {
+    try {
+      await putDevices(updateDevice._id, formUpdateDevice);
+      setUpdateDevice(null)
+    } catch (error) {}
+  };
   return (
     <div>
-      <h2 className="text-gray-400 font-semibold text-3xl mb-6">
-        Agregar nuevo dispositivo
-      </h2>
+      <h2 className="text-gray-400 font-semibold text-3xl mb-6">Editar</h2>
       <form
         className="bg-gray-800 p-6 rounded-xl shadow-lg space-y-5 text-white"
         onSubmit={(e) => {
           e.preventDefault();
-          crearDevice();
+          actualizarDevice();
         }}
       >
         <div className="flex flex-col">
@@ -69,10 +68,10 @@ const AgregarDevice = ({ setActualizar}) => {
           <input
             type="text"
             id="name"
-            value={formCreateDevice.name}
+            value={formUpdateDevice.name}
             name="name"
             className="p-2 rounded-md bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onChange={handlerCreateDeviceForm}
+            onChange={handlerUpdateDeviceForm}
           />
         </div>
 
@@ -84,9 +83,9 @@ const AgregarDevice = ({ setActualizar}) => {
             type="text"
             id="ip"
             name="ip"
-            value={formCreateDevice.ip}
+            value={formUpdateDevice.ip}
             className="p-2 rounded-md bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onChange={handlerCreateDeviceForm}
+            onChange={handlerUpdateDeviceForm}
           />
         </div>
 
@@ -97,10 +96,10 @@ const AgregarDevice = ({ setActualizar}) => {
           <input
             type="text"
             name="tag"
-            value={formCreateDevice.tag}
+            value={formUpdateDevice.tag}
             id="tag"
             className="p-2 rounded-md bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onChange={handlerCreateDeviceForm}
+            onChange={handlerUpdateDeviceForm}
           />
         </div>
 
@@ -112,9 +111,9 @@ const AgregarDevice = ({ setActualizar}) => {
             type="text"
             id="description"
             name="description"
-            value={formCreateDevice.description}
+            value={formUpdateDevice.description}
             className="p-2 rounded-md bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onChange={handlerCreateDeviceForm}
+            onChange={handlerUpdateDeviceForm}
           />
         </div>
 
@@ -124,9 +123,9 @@ const AgregarDevice = ({ setActualizar}) => {
               type="checkbox"
               id="isConnected"
               name="isConnected"
-              value={formCreateDevice.isConnected}
+              checked={formUpdateDevice.isConnected}
               className="accent-blue-500 w-5 h-5"
-              onChange={handlerCreateDeviceForm}
+              onChange={handlerUpdateDeviceForm}
             />
             <label htmlFor="isConnected" className="font-medium">
               Conectado?
@@ -137,10 +136,10 @@ const AgregarDevice = ({ setActualizar}) => {
             <input
               type="checkbox"
               id="notifications"
-              value={formCreateDevice.notifications}
+              checked={formUpdateDevice.notifications}
               className="accent-blue-500 w-5 h-5"
               name="notifications"
-              onChange={handlerCreateDeviceForm}
+              onChange={handlerUpdateDeviceForm}
             />
             <label htmlFor="notifications" className="font-medium">
               Notificaciones
@@ -152,7 +151,7 @@ const AgregarDevice = ({ setActualizar}) => {
             type="submit"
             className="font-semibold px-4 py-2 text-gray-900 bg-green-400 cursor-pointer"
           >
-            Crear dispositivo
+            Actualizar dispositivo
           </button>
         </div>
       </form>
@@ -160,4 +159,4 @@ const AgregarDevice = ({ setActualizar}) => {
   );
 };
 
-export default AgregarDevice;
+export default UpdateDevice;
