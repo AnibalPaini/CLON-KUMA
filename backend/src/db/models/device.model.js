@@ -9,7 +9,7 @@ const DeviceSchema = mongoose.Schema(
     paused:{type: Boolean, default: false},
     notifications:{type: Boolean, default: true},
     description:{type: String},
-    tag:{type: String}
+    tag:{type: mongoose.Schema.Types.ObjectId, ref:"tags" }
   },
   { timestamp: true }
 );
