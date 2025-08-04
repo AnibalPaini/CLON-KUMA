@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const tagSchema = mongoose.Schema({
   name:{type:String, requiered:true},
-  color:{type:String,enum:["gris", "rojo", "verde", "naranja", "violeta", "rosa", "azul"], requiered:true},
+  color:{type:String,enum:["gray", "red", "green", "orange", "purple", "pink", "blue", "yellow"], requiered:true},
 }, { timestamps: true });
 
 const tagModel= mongoose.model("tags", tagSchema)

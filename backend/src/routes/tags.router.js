@@ -3,12 +3,12 @@ import {
     postTagsController,
     getTagsController,
     getTagsByIdController
-} from "../controllers/deviceStats.controller.js";
+} from "../controllers/tags.controller.js";
 
-const deviceStatsRouter = Router();
+const tagsRouter = Router();
 
-deviceStatsRouter.get("/:did", getDeviceStatController);
-deviceStatsRouter.get("/:did/promedios", getDevicesPromedios);
-deviceStatsRouter.get("/pings/:did",getLastsPings)
+tagsRouter.get("/", getTagsController);
+tagsRouter.get("/:tid", getTagsByIdController);
+tagsRouter.post("/",postTagsController)
 
-export default deviceStatsRouter;
+export default tagsRouter;
