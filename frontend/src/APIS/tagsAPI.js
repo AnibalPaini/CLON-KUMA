@@ -6,3 +6,8 @@ export const getTags= async()=>{
     return await axios.get(`${URL}/`)
 }
 
+export const postTag= async(datos)=>{
+    console.log("API tag");
+    
+    return await axios.post(`${URL}/`, (datos))
+}

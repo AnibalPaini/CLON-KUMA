@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { postDevices } from "../APIS/deviceAPI";
-import { getTags } from "../APIS/tagsAPI";
+import { getTags, postTag } from "../APIS/tagsAPI";
 import { useState } from "react";
 import Select from "react-select";
 
@@ -13,6 +13,10 @@ const AgregarDevice = ({ setActualizar }) => {
     description: "",
     tag: "",
   });
+  const [tagSeleccionada, setTagSeleccionada] = useState(null);
+
+  const [nameTag, setNameTag] = useState("");
+  const [colorTag, setColorTag] = useState("");
 
   const [listadoTags, setListadoTags] = useState([]);
   const [modalTags, setModalTags] = useState(false);
@@ -33,6 +37,24 @@ const AgregarDevice = ({ setActualizar }) => {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const crearTag = async () => {
+    try {
+      const res = await postTag({ name: nameTag, color: colorTag });
+      console.log(res);
+      vincularTag(res.data._id);
+      obtenerTags();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const vincularTag = (id) => {
+    setFormCreateDevice((prev) => ({
+      ...prev,
+      tag: id,
+    }));
   };
 
   const crearDevice = async () => {
@@ -234,8 +256,14 @@ const AgregarDevice = ({ setActualizar }) => {
         </div>
       </form>
       {modalTags && (
-        <div className="z-50 fixed inset-0 flex items-center justify-center bg-gray-800/60 bg-opacity-50">
-          <div className="bg-gray-800 rounded-xl p-6 shadow-xl flex flex-col gap-4 w-full max-w-md text-white">
+        <div
+          className="z-50 fixed inset-0 flex items-center justify-center bg-gray-700/80 bg-opacity-50"
+          onClick={() => setModalTags(false)}
+        >
+          <div
+            className="bg-gray-800 rounded-xl p-6 shadow-xl flex flex-col gap-4 w-full max-w-md text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h2 className="text-xl font-semibold text-gray-100">Agregar Tag</h2>
             {/*             <select name="" id="" className="p-2 rounded-md bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">Selecciona</option>
@@ -248,6 +276,9 @@ const AgregarDevice = ({ setActualizar }) => {
               placeholder="Selecciona una etiqueta..."
               isClearable
               formatOptionLabel={formatOptionLabel}
+              onChange={(option) => {
+                setTagSeleccionada(option);
+              }}
               styles={{
                 control: (base) => ({
                   ...base,
@@ -270,51 +301,64 @@ const AgregarDevice = ({ setActualizar }) => {
                 }),
               }}
             />
+            {!tagSeleccionada && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  crearTag();
 
-            <div className="flex space-x-2">
-              <div className="w-full">
-                <input
-                  type="text"
-                  placeholder="Nombre"
-                  className="px-2 py-1.5 rounded-sm bg-gray-700 border border-gray-600 text-white font-light"
-                />
-              </div>
-              <div className="w-full">
-                <Select
-                  options={opcionesColor}
-                  formatOptionLabel={formatColorOption}
-                  placeholder="Color"
-                  styles={{
-                    control: (base) => ({
-                      ...base,
-                      backgroundColor: "#374151",
-                      borderColor: "#4b5563",
-                      color: "white",
-                    }),
-                    menu: (base) => ({
-                      ...base,
-                      backgroundColor: "#1f2937", // bg-gray-800
-                    }),
-                    singleValue: (base, { data }) => ({
-                      ...base,
-                      backgroundColor: tailwindColors[data.value],
-                      borderRadius: "9999px",
-                      padding: "2px 10px",
-                      color: "white",
-                      fontWeight: 500,
-                      fontSize: "0.85rem",
-                    }),
-                  }}
-                />
-              </div>
-            </div>
-
-            <button
-              onClick={() => setModalTags(false)}
-              className="self-end text-sm text-blue-600 hover:underline"
-            >
-              Cerrar
-            </button>
+                  toggleModalTag();
+                }}
+              >
+                <div className="flex space-x-2">
+                  <div className="w-full">
+                    <input
+                      type="text"
+                      placeholder="Nombre"
+                      onChange={(e) => setNameTag(e.target.value)}
+                      value={nameTag}
+                      className="px-2 py-1.5 rounded-sm bg-gray-700 border border-gray-600 text-white font-light"
+                    />
+                  </div>
+                  <div className="w-full">
+                    <Select
+                      options={opcionesColor}
+                      formatOptionLabel={formatColorOption}
+                      placeholder="Color"
+                      onChange={(option) => {
+                        setColorTag(option.value);
+                      }}
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          backgroundColor: "#374151",
+                          borderColor: "#4b5563",
+                          color: "white",
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          backgroundColor: "#1f2937",
+                        }),
+                        singleValue: (base, { data }) => ({
+                          ...base,
+                          backgroundColor: tailwindColors[data.value],
+                          borderRadius: "9999px",
+                          padding: "2px 10px",
+                          color: "white",
+                          fontWeight: 500,
+                          fontSize: "0.85rem",
+                        }),
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="flex w-full justify-end mt-3">
+                  <button className="bg-green-500 px-4 py-1 rounded-2xl text-gray-800 font-semibold">
+                    Añadir
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

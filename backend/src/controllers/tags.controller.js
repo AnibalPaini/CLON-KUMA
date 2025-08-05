@@ -34,8 +34,9 @@ export const postTagsController=async(req,res)=>{
             return res.status(400).send("Debe completar los campos")
         }
         const tag = await tagsService.create({name, color})
-        res.status(200).send({status:"Success", payload:tag})
+        res.status(201).send({status:"Success", payload:tag})
     } catch (error) {
+        console.log(error);
         res.status(500).send("error")
     }
 }
