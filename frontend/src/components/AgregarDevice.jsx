@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { postDevices } from "../APIS/deviceAPI";
-import { getTags, postTag } from "../APIS/tagsAPI";
+import { getTags, postTag, getTagById } from "../APIS/tagsAPI";
 import { useState } from "react";
 import Select from "react-select";
 
@@ -14,6 +14,7 @@ const AgregarDevice = ({ setActualizar }) => {
     tag: "",
   });
   const [tagSeleccionada, setTagSeleccionada] = useState(null);
+  const [tagVinculada, setTagVinculada] = useState(null);
 
   const [nameTag, setNameTag] = useState("");
   const [colorTag, setColorTag] = useState("");
@@ -55,6 +56,18 @@ const AgregarDevice = ({ setActualizar }) => {
       ...prev,
       tag: id,
     }));
+    obtenerTagById(id);
+    toggleModalTag();
+    setTagSeleccionada(null);
+  };
+
+  const obtenerTagById = async (id) => {
+    try {
+      const res = await getTagById(id);
+      setTagVinculada(res.data.payload);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const crearDevice = async () => {
@@ -215,9 +228,18 @@ const AgregarDevice = ({ setActualizar }) => {
           >
             Agregar etiqueta
           </button>
+          {formCreateDevice.tag && (
+            <div className="mt-3">
+              <span
+                className={`px-4 py-1 w-fit rounded-2xl text-center text-md bg-${tagVinculada?.color}-500`}
+              >
+                {tagVinculada?.name}
+              </span>
+            </div>
+          )}
         </div>
 
-        <div className="flex gap-x-10">
+        <div className="flex gap-x-10 ">
           <div className="flex items-center space-x-3">
             <input
               type="checkbox"
@@ -249,7 +271,7 @@ const AgregarDevice = ({ setActualizar }) => {
         <div className="flex ">
           <button
             type="submit"
-            className="font-semibold px-4 py-2 text-gray-900 bg-green-400 cursor-pointer"
+            className="font-semibold px-4 py-2 text-black bg-green-400 cursor-pointer"
           >
             Crear dispositivo
           </button>
@@ -306,8 +328,6 @@ const AgregarDevice = ({ setActualizar }) => {
                 onSubmit={(e) => {
                   e.preventDefault();
                   crearTag();
-
-                  toggleModalTag();
                 }}
               >
                 <div className="flex space-x-2">
@@ -358,6 +378,16 @@ const AgregarDevice = ({ setActualizar }) => {
                   </button>
                 </div>
               </form>
+            )}
+            {tagSeleccionada && (
+              <div className="flex w-full justify-end mt-3">
+                <button
+                  className="bg-green-500 px-4 py-1 rounded-2xl text-gray-800 font-semibold"
+                  onClick={() => vincularTag(tagSeleccionada.value)}
+                >
+                  Añadir
+                </button>
+              </div>
             )}
           </div>
         </div>
