@@ -79,6 +79,9 @@ const ListaDispositivos = ({
             className="py-1 px-2 border rounded-2xl border-gray-800"
           />
         </div>
+        <div className="flex">
+
+        </div>
       </div>
       <div className=" bg-gray-800 w-full px-2 py-4">
         {listaDevices.length !== 0 ? (

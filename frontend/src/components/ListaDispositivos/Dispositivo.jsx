@@ -77,8 +77,8 @@ const Dispositivo = ({ device, setActualizar, actualizar }) => {
         {device.tag && (
           <div className="flex items-center pl-[4.5rem] mt-1">
             {/* El 4.5rem es el width del span (w-16 = 4rem + padding), ajustable */}
-            <p className="bg-orange-300 px-2 py-1 w-fit rounded-2xl text-center text-xs">
-              {device.tag}
+            <p className={`px-2 py-1 w-fit rounded-2xl text-center text-xs bg-${device.tag?.color}-500`}>
+              {device.tag?.name}
             </p>
           </div>
         )}
